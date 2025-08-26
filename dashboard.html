@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VX Creator Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0e0e0e;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .glow-red {
+      color: #ff4c4c;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-shadow: 0 0 12px #ff4c4c;
+    }
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      margin-right: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .tab-btn:hover {
+      background-color: #1e1e1e;
+    }
+    .tab-btn.active {
+      background-color: #ff4c4c;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .code-box {
+      background: #1f1f1f;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      color: #00ff99;
+      min-height: 200px;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div class="glow-red">VX CREATOR</div>
+    <div class="text-sm text-gray-400">Bot Hosting Panel</div>
+  </div>
+
+  <!-- Bot Token Input -->
+  <div class="glass max-w-xl mx-auto mb-8">
+    <h2 class="text-lg font-semibold mb-3">Add Telegram Bot</h2>
+    <input id="tokenInput" type="text" placeholder="Enter Bot Token" class="w-full p-2 mb-4 rounded bg-gray-800 border border-gray-600 text-white outline-none focus:ring-2 focus:ring-red-500" />
+    <button onclick="fetchBotInfo()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-white w-full">Fetch Bot Info</button>
+
+    <div id="botInfo" class="mt-4 hidden">
+      <h3 class="text-md font-semibold">🤖 Bot Name: <span id="botName" class="text-green-400"></span></h3>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="glass max-w-6xl mx-auto">
+    <div class="flex mb-4">
+      <button class="tab-btn active" onclick="showTab('details')">Details</button>
+      <button class="tab-btn" onclick="showTab('code')">Code</button>
+      <button class="tab-btn" onclick="showTab('errors')">Errors</button>
+      <button class="tab-btn" onclick="showTab('settings')">Settings</button>
+    </div>
+
+    <div id="details" class="tab-content active">
+      <p class="text-gray-300">This section shows the bot's meta details and logs (coming soon...)</p>
+    </div>
+
+    <div id="code" class="tab-content">
+      <input type="text" placeholder="🔍 Search Code..." class="w-full p-2 mb-4 rounded bg-gray-800 border border-gray-600 text-white" />
+
+      <div class="code-box" id="codeBox">
+        // No sections found.
+      </div>
+
+      <button onclick="editWholeCode()" class="mt-4 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">Edit Whole Bot Code</button>
+
+      <div id="editArea" class="hidden mt-4">
+        <textarea id="fullCodeInput" class="w-full h-64 bg-black text-green-300 p-3 rounded" placeholder="// Paste your full Telegraf bot code here"></textarea>
+        <button onclick="saveCode()" class="mt-3 bg-green-600 hover:bg-green-700 px-4 py-2 rounded">Save & Run Bot</button>
+      </div>
+    </div>
+
+    <div id="errors" class="tab-content">
+      <p class="text-yellow-400">⚠️ Error logs will be displayed here (integrated in backend).</p>
+    </div>
+
+    <div id="settings" class="tab-content">
+      <p class="text-gray-400">🛠️ Settings section - Update name, restart bot, or delete bot features (backend).</p>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+      document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function editWholeCode() {
+      document.getElementById('editArea').classList.remove('hidden');
+    }
+
+    function saveCode() {
+      const code = document.getElementById('fullCodeInput').value;
+      if (!code) return alert("Code is empty!");
+
+      // In real app: send this code to backend API to run the bot
+      alert("✅ Code saved and bot started!");
+    }
+
+    async function fetchBotInfo() {
+      const token = document.getElementById('tokenInput').value.trim();
+      if (!token) return alert("Please enter a bot token");
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById('botName').innerText = data.result.first_name + ' (@' + data.result.username + ')';
+          document.getElementById('botInfo').classList.remove('hidden');
+        } else {
+          alert("Invalid Token or Bot not accessible.");
+        }
+      } catch (err) {
+        alert("Error connecting to Telegram API.");
+      }
+    }
+  </script>
+</body>
+</html>
